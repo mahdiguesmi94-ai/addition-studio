@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#b52332">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Add Studio">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="./app-icon.svg">
+    <title>Addition Studio</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --red: #b52332;
+            --red-dark: #7d1724;
+            --ink: #24191a;
+            --muted: #816f70;
+            --paper: #fffaf7;
+            --line: #eadbd7;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 32px 20px;
+            color: var(--ink);
+            background-color: #f8efeb;
+            background-image: repeating-linear-gradient(135deg, transparent 0 38px, rgb(181 35 50 / 3%) 38px 39px);
+            font-family: "Trebuchet MS", sans-serif;
+        }
+
+        .studio {
+            width: min(100%, 680px);
+            overflow: hidden;
+            border: 1px solid rgb(125 23 36 / 12%);
+            border-radius: 8px;
+            background: var(--paper);
+            box-shadow: 0 28px 80px rgb(83 31 34 / 14%);
+            animation: arrive 650ms cubic-bezier(.2, .75, .25, 1) both;
+        }
+
+        .topbar {
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            color: white;
+            background: var(--red);
+        }
+
+        .brand, .edition {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .edition { opacity: .75; }
+
+        .install-button {
+            width: auto;
+            min-height: 34px;
+            margin: 0;
+            padding: 0 11px;
+            border: 1px solid rgb(255 255 255 / 55%);
+            color: white;
+            background: transparent;
+            font-size: 10px;
+            letter-spacing: .6px;
+        }
+
+        .install-button:hover {
+            transform: none;
+            background: rgb(255 255 255 / 12%);
+            box-shadow: none;
+        }
+
+        .install-button[hidden] { display: none; }
+
+        main { padding: 48px 54px 46px; }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 14px;
+            color: var(--red);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+            width: 22px;
+            height: 2px;
+            content: "";
+            background: currentColor;
+        }
+
+        h1 {
+            max-width: 460px;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(38px, 8vw, 58px);
+            font-weight: 400;
+            line-height: 1.04;
+        }
+
+        h1 span { color: var(--red); font-style: italic; }
+
+        .intro {
+            margin: 14px 0 36px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        form { margin: 0; }
+
+        .mode-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .mode-title {
+            margin: 0;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .mode-options {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 3px;
+            padding: 3px;
+            border-radius: 5px;
+            background: #f3e8e4;
+        }
+
+        .mode-option { position: relative; cursor: pointer; }
+
+        .mode-option input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        .mode-option span {
+            min-width: 76px;
+            min-height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 3px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .mode-option input:checked + span {
+            color: var(--red-dark);
+            background: var(--paper);
+            box-shadow: 0 1px 4px rgb(83 31 34 / 12%);
+        }
+
+        .mode-option input:focus-visible + span { outline: 2px solid var(--red); outline-offset: 2px; }
+
+        .equation {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+            align-items: end;
+            gap: 14px;
+        }
+
+        .equation.is-convert { grid-template-columns: minmax(0, 1fr); }
+
+        .field label {
+            display: block;
+            margin-bottom: 9px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .field input {
+            width: 100%;
+            height: 62px;
+            padding: 0 17px;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            outline: none;
+            color: var(--ink);
+            background: white;
+            font: 400 23px Georgia, "Times New Roman", serif;
+            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        }
+
+        .field input:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgb(181 35 50 / 11%);
+            transform: translateY(-2px);
+        }
+
+        .operator {
+            align-self: end;
+            padding-bottom: 16px;
+            color: var(--red);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 30px;
+            text-align: center;
+        }
+
+        button {
+            width: 100%;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 22px;
+            border: 0;
+            border-radius: 5px;
+            color: white;
+            background: var(--red);
+            cursor: pointer;
+            font: 700 12px "Trebuchet MS", sans-serif;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background: var(--red-dark);
+            box-shadow: 0 8px 18px rgb(125 23 36 / 20%);
+        }
+
+        button:active { transform: translateY(0); }
+        button:focus-visible { outline: 3px solid #e7a1a7; outline-offset: 3px; }
+
+        .result {
+            min-height: 84px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 24px;
+            padding: 18px 20px;
+            border-left: 3px solid var(--red);
+            background: #f8eeea;
+        }
+
+        .result[hidden] { display: none; }
+        .result-label { color: var(--muted); font-size: 12px; }
+        .result-value {
+            color: var(--red-dark);
+            font: 400 34px Georgia, "Times New Roman", serif;
+            overflow-wrap: anywhere;
+            text-align: right;
+        }
+        .result.is-new { animation: result-in 360ms ease both; }
+
+        .explain-toggle {
+            width: auto;
+            min-height: 40px;
+            justify-content: flex-start;
+            margin: 8px 0 0;
+            padding: 0;
+            border-radius: 0;
+            color: var(--red);
+            background: transparent;
+            font-size: 12px;
+            letter-spacing: .2px;
+            text-transform: none;
+        }
+
+        .explain-toggle:hover {
+            transform: none;
+            color: var(--red-dark);
+            background: transparent;
+            box-shadow: none;
+            text-decoration: underline;
+        }
+
+        .explain-toggle[hidden], .explanation[hidden] { display: none; }
+
+        .explanation {
+            margin-top: 14px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+            animation: result-in 300ms ease both;
+        }
+
+        .explanation h2 {
+            margin: 0;
+            color: var(--ink);
+            font: 400 22px Georgia, "Times New Roman", serif;
+        }
+
+        .explanation ol {
+            margin: 14px 0 0;
+            padding-left: 22px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .explanation li + li { margin-top: 8px; }
+
+        .footnote {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 28px 0 0;
+            color: #99898a;
+            font-size: 11px;
+        }
+
+        .footnote::before {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            content: "";
+            background: #cb626b;
+        }
+
+        @keyframes arrive {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes result-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 520px) {
+            body { padding: 16px 12px; }
+            .topbar { padding: 0 20px; }
+            main { padding: 36px 24px 30px; }
+            .intro { margin-bottom: 28px; }
+            .mode-switch { align-items: stretch; flex-direction: column; gap: 9px; }
+            .mode-option span { min-width: 0; }
+            .equation { grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr); gap: 8px; }
+            .field input { height: 56px; padding: 0 12px; font-size: 20px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="studio">
+        <header class="topbar">
+            <p class="brand">Addition Studio</p>
+            <p class="edition">No. 01</p>
+            <button id="install-button" class="install-button" type="button" hidden>Install app</button>
+        </header>
+        <main>
+            <p class="eyebrow">A little arithmetic</p>
+            <h1>Bring your numbers <span>together.</span></h1>
+            <p class="intro">A simple space to add two numbers and see what they make.</p>
+
+            <form id="addition-form">
+                <div class="mode-switch" role="group" aria-labelledby="mode-title">
+                    <p class="mode-title" id="mode-title">Number mode</p>
+                    <div class="mode-options">
+                        <label class="mode-option">
+                            <input type="radio" name="number-mode" value="decimal" checked>
+                            <span>Decimal</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="number-mode" value="binary">
+                            <span>Binary</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="number-mode" value="convert">
+                            <span>To binary</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="number-mode" value="to-decimal">
+                            <span>To decimal</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="equation">
+                    <div class="field">
+                        <label id="first-label" for="first-number">First number</label>
+                        <input id="first-number" name="first-number" type="text" inputmode="decimal" placeholder="12" autocomplete="off" required>
+                    </div>
+                    <span class="operator" aria-hidden="true">+</span>
+                    <div class="field">
+                        <label id="second-label" for="second-number">Second number</label>
+                        <input id="second-number" name="second-number" type="text" inputmode="decimal" placeholder="8" autocomplete="off" required>
+                    </div>
+                </div>
+                <button type="submit"><span id="action-icon" aria-hidden="true">＋</span> <span id="action-label">Add numbers</span></button>
+            </form>
+
+            <div id="result" class="result" aria-live="polite" hidden>
+                <span id="result-label" class="result-label">Your total</span>
+                <output id="result-value" class="result-value" for="first-number second-number"></output>
+            </div>
+            <button id="explain-toggle" class="explain-toggle" type="button" aria-expanded="false" aria-controls="explanation" hidden>Explain steps</button>
+            <section id="explanation" class="explanation" aria-live="polite" hidden>
+                <h2>Calculation steps</h2>
+                <ol id="explanation-list"></ol>
+            </section>
+            <p class="footnote">Made for the joy of getting it right.</p>
+        </main>
+    </div>
+
+    <script>
+        const form = document.querySelector("#addition-form");
+        const result = document.querySelector("#result");
+        const resultLabel = document.querySelector("#result-label");
+        const resultValue = document.querySelector("#result-value");
+        const explainToggle = document.querySelector("#explain-toggle");
+        const explanation = document.querySelector("#explanation");
+        const explanationList = document.querySelector("#explanation-list");
+        const firstInput = form.elements["first-number"];
+        const secondInput = form.elements["second-number"];
+        const numberInputs = [firstInput, secondInput];
+        const equation = document.querySelector(".equation");
+        const secondField = secondInput.closest(".field");
+        const operator = document.querySelector(".operator");
+        const firstLabel = document.querySelector("#first-label");
+        const secondLabel = document.querySelector("#second-label");
+        const actionIcon = document.querySelector("#action-icon");
+        const actionLabel = document.querySelector("#action-label");
+        let lastCalculation = null;
+
+        function getBinaryAdditionSteps(first, second, total) {
+            const steps = [`Line up ${first} and ${second} from the right, adding zeroes on the left where needed.`];
+            const writtenBits = [];
+            let carry = 0;
+            const columnCount = Math.max(first.length, second.length);
+
+            for (let column = 0; column < columnCount; column += 1) {
+                const firstBit = Number(first[first.length - 1 - column] || "0");
+                const secondBit = Number(second[second.length - 1 - column] || "0");
+                const carryIn = carry;
+                const columnSum = firstBit + secondBit + carryIn;
+                const resultBit = columnSum % 2;
+                carry = Math.floor(columnSum / 2);
+                writtenBits.push(String(resultBit));
+                steps.push(`Column ${column + 1} (2^${column}): ${firstBit} + ${secondBit} + carry ${carryIn} = ${columnSum}. Write ${resultBit}; carry ${carry}.`);
+            }
+
+            if (carry) writtenBits.push(String(carry));
+            const calculatedBits = writtenBits.reverse().join("").replace(/^0+(?=\d)/, "");
+            steps.push(`Read the bits from left to right to get ${calculatedBits || "0"}.`);
+            steps.push(`The binary sum is ${total}.`);
+            return steps;
+        }
+
+        function getConversionSteps(decimalValue, binaryValue) {
+            let remaining = BigInt(decimalValue);
+            const isNegative = remaining < 0n;
+            if (isNegative) remaining = -remaining;
+
+            if (remaining === 0n) {
+                return ["The input is zero, which is written as 0 in binary."];
+            }
+
+            const steps = [];
+            const remainders = [];
+            while (remaining > 0n) {
+                const quotient = remaining / 2n;
+                const remainder = remaining % 2n;
+                steps.push(`${remaining} divided by 2 is ${quotient}, remainder ${remainder}.`);
+                remainders.push(String(remainder));
+                remaining = quotient;
+            }
+
+            const binaryMagnitude = remainders.reverse().join("");
+            steps.push(`Read the remainders from bottom to top: ${binaryMagnitude}.`);
+            if (isNegative) steps.push(`Apply the negative sign to get ${binaryValue}.`);
+            return steps;
+        }
+
+        function getBinaryToDecimalSteps(binaryValue, decimalValue) {
+            const steps = ["Each binary digit represents a power of 2, starting at 2^0 on the right."];
+            const placeValues = [];
+
+            for (let position = 0; position < binaryValue.length; position += 1) {
+                const bit = Number(binaryValue[binaryValue.length - 1 - position]);
+                if (bit === 1) {
+                    const placeValue = 2n ** BigInt(position);
+                    placeValues.push(String(placeValue));
+                    steps.push(`The 1 at position ${position} contributes 2^${position} = ${placeValue}.`);
+                }
+            }
+
+            if (placeValues.length) {
+                steps.push(`Add the place values: ${placeValues.join(" + ")} = ${decimalValue}.`);
+            } else {
+                steps.push("Every digit is 0, so the decimal value is 0.");
+            }
+            return steps;
+        }
+
+        function getCalculationSteps(calculation) {
+            if (calculation.mode === "convert") {
+                return getConversionSteps(calculation.values[0], calculation.display);
+            }
+            if (calculation.mode === "to-decimal") {
+                return getBinaryToDecimalSteps(calculation.values[0], calculation.display);
+            }
+            if (calculation.mode === "binary") {
+                return getBinaryAdditionSteps(calculation.values[0], calculation.values[1], calculation.display);
+            }
+            return [
+                `Both inputs are decimal (base 10): ${calculation.values[0]} and ${calculation.values[1]}.`,
+                `Add the two values: ${calculation.values[0]} + ${calculation.values[1]} = ${calculation.display}.`,
+                `The displayed result is ${calculation.display}.`
+            ];
+        }
+
+        function updateMode(mode) {
+            const isBinary = mode === "binary";
+            const isConvert = mode === "convert";
+            const isToDecimal = mode === "to-decimal";
+            const isSingleValue = isConvert || isToDecimal;
+            equation.classList.toggle("is-convert", isSingleValue);
+            secondField.hidden = isSingleValue;
+            operator.hidden = isSingleValue;
+            secondInput.required = !isSingleValue;
+            firstLabel.textContent = isConvert ? "Decimal integer" : isToDecimal ? "Binary integer" : "First number";
+            secondLabel.textContent = "Second number";
+            firstInput.inputMode = isBinary || isToDecimal ? "numeric" : "decimal";
+            secondInput.inputMode = isBinary ? "numeric" : "decimal";
+            firstInput.placeholder = isConvert ? "42" : isBinary || isToDecimal ? "1010" : "12";
+            secondInput.placeholder = isBinary ? "11" : "8";
+            actionIcon.textContent = isSingleValue ? "→" : "＋";
+            actionLabel.textContent = isConvert ? "Convert to binary" : isToDecimal ? "Convert to decimal" : "Add numbers";
+            numberInputs.forEach((input) => {
+                input.value = "";
+                input.setCustomValidity("");
+            });
+            result.hidden = true;
+            explainToggle.hidden = true;
+            explanation.hidden = true;
+            lastCalculation = null;
+        }
+
+        form.querySelectorAll('input[name="number-mode"]').forEach((modeInput) => {
+            modeInput.addEventListener("change", () => {
+                updateMode(modeInput.value);
+            });
+        });
+
+        numberInputs.forEach((input) => {
+            input.addEventListener("input", () => {
+                input.setCustomValidity("");
+                result.hidden = true;
+                explainToggle.hidden = true;
+                explanation.hidden = true;
+                lastCalculation = null;
+            });
+        });
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const mode = form.elements["number-mode"].value;
+            const values = numberInputs.map((input) => input.value.trim());
+
+            if (mode === "convert") {
+                if (!/^-?\d+$/.test(values[0])) {
+                    firstInput.setCustomValidity("Enter a whole decimal number.");
+                    firstInput.reportValidity();
+                    return;
+                }
+                resultValue.textContent = BigInt(values[0]).toString(2);
+                resultLabel.textContent = "Binary equivalent";
+            } else if (mode === "to-decimal") {
+                if (!/^[01]+$/.test(values[0])) {
+                    firstInput.setCustomValidity("Enter binary digits only: 0 and 1.");
+                    firstInput.reportValidity();
+                    return;
+                }
+                resultValue.textContent = BigInt(`0b${values[0]}`).toString(10);
+                resultLabel.textContent = "Decimal equivalent";
+            } else if (mode === "binary") {
+                const invalidInput = numberInputs.find((input) => !/^[01]+$/.test(input.value.trim()));
+                if (invalidInput) {
+                    invalidInput.setCustomValidity("Enter binary digits only: 0 and 1.");
+                    invalidInput.reportValidity();
+                    return;
+                }
+                resultValue.textContent = (BigInt(`0b${values[0]}`) + BigInt(`0b${values[1]}`)).toString(2);
+                resultLabel.textContent = "Your total in binary";
+            } else {
+                const numbers = values.map(Number);
+                const invalidIndex = values.findIndex((value, index) => value === "" || !Number.isFinite(numbers[index]));
+                if (invalidIndex !== -1) {
+                    numberInputs[invalidIndex].setCustomValidity("Enter a valid decimal number.");
+                    numberInputs[invalidIndex].reportValidity();
+                    return;
+                }
+                const total = numbers[0] + numbers[1];
+                resultValue.textContent = Number.isFinite(total)
+                    ? new Intl.NumberFormat(undefined, { maximumSignificantDigits: 12 }).format(total)
+                    : "That total is too large";
+                resultLabel.textContent = "Your total";
+            }
+
+            result.hidden = false;
+            result.classList.remove("is-new");
+            requestAnimationFrame(() => result.classList.add("is-new"));
+            lastCalculation = { mode, values, display: resultValue.textContent };
+            explainToggle.hidden = false;
+            explainToggle.textContent = "Explain steps";
+            explainToggle.setAttribute("aria-expanded", "false");
+            explanation.hidden = true;
+        });
+
+        explainToggle.addEventListener("click", () => {
+            if (explanation.hidden) {
+                const steps = getCalculationSteps(lastCalculation);
+                explanationList.replaceChildren(...steps.map((step) => {
+                    const item = document.createElement("li");
+                    item.textContent = step;
+                    return item;
+                }));
+                explanation.hidden = false;
+                explainToggle.textContent = "Hide steps";
+                explainToggle.setAttribute("aria-expanded", "true");
+            } else {
+                explanation.hidden = true;
+                explainToggle.textContent = "Explain steps";
+                explainToggle.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        const installButton = document.querySelector("#install-button");
+        let installPrompt = null;
+
+        window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault();
+            installPrompt = event;
+            installButton.hidden = false;
+        });
+
+        installButton.addEventListener("click", async () => {
+            if (!installPrompt) return;
+            const prompt = installPrompt;
+            installPrompt = null;
+            await prompt.prompt();
+            await prompt.userChoice;
+            installButton.hidden = true;
+        });
+
+        window.addEventListener("appinstalled", () => {
+            installButton.hidden = true;
+            installPrompt = null;
+        });
+
+        if ("serviceWorker" in navigator && location.protocol !== "file:") {
+            navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+                console.error("Offline support could not be enabled.", error);
+            });
+        }
+    </script>
+</body>
+</html>

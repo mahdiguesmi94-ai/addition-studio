@@ -1,0 +1,19 @@
+{
+    "id": "./projet%201.html",
+    "name": "Addition Studio",
+    "short_name": "Add Studio",
+    "description": "Add, convert, and learn numbers.",
+    "start_url": "./projet%201.html",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#f8efeb",
+    "theme_color": "#b52332",
+    "icons": [
+        {
+            "src": "./app-icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
